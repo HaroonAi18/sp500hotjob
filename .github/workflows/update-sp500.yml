@@ -1,0 +1,50 @@
+name: Update S&P 500 list
+
+on:
+  schedule:
+    - cron: '30 13 * * *'   # ~9:30 AM New York (13:30 UTC)
+  workflow_dispatch: {}      # manual run
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: update-sp500
+  cancel-in-progress: true
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install deps
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Run updater
+        run: npm run update:sp500
+
+      - name: Create Pull Request with changes
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore(data): update S&P 500 constituents"
+          title: "Update S&P 500 constituents"
+          body: |
+            Automated daily refresh of S&P 500 company list.
+          branch: chore/update-sp500
+          delete-branch: true
