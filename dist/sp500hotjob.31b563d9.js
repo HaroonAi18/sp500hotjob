@@ -160,11 +160,11 @@
       });
     }
   }
-})({"1Ucli":[function(require,module,exports,__globalThis) {
+})({"gb3CR":[function(require,module,exports,__globalThis) {
 var global = arguments[3];
 var HMR_HOST = null;
 var HMR_PORT = null;
-var HMR_SERVER_PORT = 58423;
+var HMR_SERVER_PORT = 60870;
 var HMR_SECURE = false;
 var HMR_ENV_HASH = "439701173a9199ea";
 var HMR_USE_SSE = false;
@@ -16111,7 +16111,10 @@ var _papaparseDefault = parcelHelpers.interopDefault(_papaparse);
 var _s = $RefreshSig$();
 function App() {
     _s();
-    const [view, setView] = (0, _react.useState)("landing"); // 'landing' | 'companies'
+    // Views: "landing" | "companies" | "detail"
+    const [view, setView] = (0, _react.useState)("landing");
+    const [selectedCompany, setSelectedCompany] = (0, _react.useState)(null);
+    // Data
     const [companies, setCompanies] = (0, _react.useState)([]);
     const [loaded, setLoaded] = (0, _react.useState)(false);
     // UI state for Companies view
@@ -16120,7 +16123,7 @@ function App() {
     const [sortDir, setSortDir] = (0, _react.useState)("asc"); // "asc" | "desc"
     const [page, setPage] = (0, _react.useState)(1);
     const [pageSize, setPageSize] = (0, _react.useState)(10);
-    // Load CSV only when entering the Companies view first time
+    // Load CSV only when entering the Companies view the first time
     (0, _react.useEffect)(()=>{
         if (view !== "companies" || loaded) return;
         (0, _papaparseDefault.default).parse("/Data/sp500_companies.csv", {
@@ -16196,7 +16199,140 @@ function App() {
             setSortDir("asc");
         }
     }
-    if (view === "companies") return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+    /* ===================== Detail View ===================== */ if (view === "detail" && selectedCompany) return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+        style: {
+            minHeight: "100vh",
+            background: "#0b1220",
+            color: "white"
+        },
+        children: [
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("header", {
+                style: {
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    padding: "16px 24px",
+                    borderBottom: "1px solid rgba(255,255,255,0.1)"
+                },
+                children: [
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+                        style: {
+                            fontWeight: 800
+                        },
+                        children: "S&P500HotJob"
+                    }, void 0, false, {
+                        fileName: "src/App.js",
+                        lineNumber: 100,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("button", {
+                        onClick: ()=>setView("companies"),
+                        style: outlineBtn,
+                        children: "\u2190 Back to Companies"
+                    }, void 0, false, {
+                        fileName: "src/App.js",
+                        lineNumber: 101,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "src/App.js",
+                lineNumber: 91,
+                columnNumber: 9
+            }, this),
+            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("main", {
+                style: {
+                    padding: 24,
+                    maxWidth: 800,
+                    margin: "0 auto"
+                },
+                children: [
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("h1", {
+                        style: {
+                            marginBottom: 8
+                        },
+                        children: [
+                            selectedCompany["Company Name"],
+                            " (",
+                            selectedCompany.Ticker,
+                            ")"
+                        ]
+                    }, void 0, true, {
+                        fileName: "src/App.js",
+                        lineNumber: 110,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
+                        style: {
+                            opacity: 0.7,
+                            marginBottom: 24
+                        },
+                        children: [
+                            "Sector: ",
+                            selectedCompany.Sector || "N/A"
+                        ]
+                    }, void 0, true, {
+                        fileName: "src/App.js",
+                        lineNumber: 113,
+                        columnNumber: 11
+                    }, this),
+                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("section", {
+                        style: {
+                            padding: 20,
+                            border: "1px solid rgba(255,255,255,0.2)",
+                            borderRadius: 12
+                        },
+                        children: [
+                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("h2", {
+                                style: {
+                                    marginBottom: 12
+                                },
+                                children: "Jobs (Coming Soon)"
+                            }, void 0, false, {
+                                fileName: "src/App.js",
+                                lineNumber: 124,
+                                columnNumber: 13
+                            }, this),
+                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
+                                style: {
+                                    opacity: 0.8,
+                                    lineHeight: 1.6
+                                },
+                                children: [
+                                    "We\u2019ll display real job postings for ",
+                                    /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("b", {
+                                        children: selectedCompany.Ticker
+                                    }, void 0, false, {
+                                        fileName: "src/App.js",
+                                        lineNumber: 126,
+                                        columnNumber: 51
+                                    }, this),
+                                    " here once the jobs engine is hooked up."
+                                ]
+                            }, void 0, true, {
+                                fileName: "src/App.js",
+                                lineNumber: 125,
+                                columnNumber: 13
+                            }, this)
+                        ]
+                    }, void 0, true, {
+                        fileName: "src/App.js",
+                        lineNumber: 117,
+                        columnNumber: 11
+                    }, this)
+                ]
+            }, void 0, true, {
+                fileName: "src/App.js",
+                lineNumber: 109,
+                columnNumber: 9
+            }, this)
+        ]
+    }, void 0, true, {
+        fileName: "src/App.js",
+        lineNumber: 90,
+        columnNumber: 7
+    }, this);
+    /* ===================== Companies View ===================== */ if (view === "companies") return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
         style: {
             minHeight: "100vh",
             background: "#0b1220",
@@ -16220,29 +16356,22 @@ function App() {
                         children: "S&P500HotJob"
                     }, void 0, false, {
                         fileName: "src/App.js",
-                        lineNumber: 95,
+                        lineNumber: 148,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("button", {
                         onClick: ()=>setView("landing"),
-                        style: {
-                            background: "transparent",
-                            color: "white",
-                            border: "1px solid rgba(255,255,255,0.3)",
-                            borderRadius: 10,
-                            padding: "8px 14px",
-                            cursor: "pointer"
-                        },
+                        style: outlineBtn,
                         children: "\u2190 Back"
                     }, void 0, false, {
                         fileName: "src/App.js",
-                        lineNumber: 96,
+                        lineNumber: 149,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "src/App.js",
-                lineNumber: 86,
+                lineNumber: 139,
                 columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("main", {
@@ -16254,12 +16383,12 @@ function App() {
                 children: [
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("h1", {
                         style: {
-                            marginBottom: 12
+                            marginBottom: 8
                         },
                         children: "S&P 500 Companies"
                     }, void 0, false, {
                         fileName: "src/App.js",
-                        lineNumber: 112,
+                        lineNumber: 155,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
@@ -16267,10 +16396,20 @@ function App() {
                             opacity: 0.7,
                             marginBottom: 16
                         },
-                        children: "Data source: local CSV (we\u2019ll wire auto-updates later)."
-                    }, void 0, false, {
+                        children: [
+                            "Data source: ",
+                            /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("code", {
+                                children: "Data/sp500_companies.csv"
+                            }, void 0, false, {
+                                fileName: "src/App.js",
+                                lineNumber: 157,
+                                columnNumber: 26
+                            }, this),
+                            " (auto-updater ready)."
+                        ]
+                    }, void 0, true, {
                         fileName: "src/App.js",
-                        lineNumber: 113,
+                        lineNumber: 156,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -16286,37 +16425,22 @@ function App() {
                                 value: query,
                                 onChange: (e)=>setQuery(e.target.value),
                                 placeholder: "Search by ticker or company name\u2026",
-                                style: {
-                                    flex: 1,
-                                    minWidth: 260,
-                                    padding: "10px 12px",
-                                    borderRadius: 10,
-                                    border: "1px solid rgba(255,255,255,0.2)",
-                                    background: "rgba(255,255,255,0.05)",
-                                    color: "white",
-                                    outline: "none"
-                                }
+                                style: searchInput
                             }, void 0, false, {
                                 fileName: "src/App.js",
-                                lineNumber: 127,
+                                lineNumber: 170,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("label", {
                                 style: {
-                                    opacity: 0.8
+                                    opacity: 0.85
                                 },
                                 children: [
                                     "Page size:\xa0",
                                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("select", {
                                         value: pageSize,
                                         onChange: (e)=>setPageSize(Number(e.target.value)),
-                                        style: {
-                                            padding: "8px 10px",
-                                            borderRadius: 8,
-                                            background: "rgba(255,255,255,0.05)",
-                                            color: "white",
-                                            border: "1px solid rgba(255,255,255,0.2)"
-                                        },
+                                        style: selectInput,
                                         children: [
                                             10,
                                             20,
@@ -16327,38 +16451,30 @@ function App() {
                                                 children: n
                                             }, n, false, {
                                                 fileName: "src/App.js",
-                                                lineNumber: 156,
+                                                lineNumber: 184,
                                                 columnNumber: 19
                                             }, this))
                                     }, void 0, false, {
                                         fileName: "src/App.js",
-                                        lineNumber: 144,
+                                        lineNumber: 178,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "src/App.js",
-                                lineNumber: 142,
+                                lineNumber: 176,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "src/App.js",
-                        lineNumber: 118,
+                        lineNumber: 161,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                        style: {
-                            overflowX: "auto",
-                            border: "1px solid rgba(255,255,255,0.1)",
-                            borderRadius: 12
-                        },
+                        style: tableWrap,
                         children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("table", {
-                            style: {
-                                width: "100%",
-                                borderCollapse: "collapse",
-                                minWidth: 520
-                            },
+                            style: tableBase,
                             children: [
                                 /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("thead", {
                                     children: /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("tr", {
@@ -16372,13 +16488,7 @@ function App() {
                                             const active = sortKey === key;
                                             return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("th", {
                                                 onClick: ()=>clickHeader(key),
-                                                style: {
-                                                    textAlign: "left",
-                                                    padding: 12,
-                                                    borderBottom: "1px solid rgba(255,255,255,0.1)",
-                                                    cursor: "pointer",
-                                                    userSelect: "none"
-                                                },
+                                                style: th(active),
                                                 title: "Click to sort",
                                                 children: [
                                                     key,
@@ -16386,25 +16496,30 @@ function App() {
                                                 ]
                                             }, key, true, {
                                                 fileName: "src/App.js",
-                                                lineNumber: 182,
+                                                lineNumber: 198,
                                                 columnNumber: 23
                                             }, this);
                                         })
                                     }, void 0, false, {
                                         fileName: "src/App.js",
-                                        lineNumber: 178,
+                                        lineNumber: 194,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "src/App.js",
-                                    lineNumber: 177,
+                                    lineNumber: 193,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("tbody", {
                                     children: [
                                         paged.map((row, i)=>/*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("tr", {
+                                                onClick: ()=>{
+                                                    setSelectedCompany(row);
+                                                    setView("detail");
+                                                },
                                                 style: {
-                                                    borderBottom: "1px solid rgba(255,255,255,0.06)"
+                                                    borderBottom: "1px solid rgba(255,255,255,0.06)",
+                                                    cursor: "pointer"
                                                 },
                                                 children: [
                                                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("td", {
@@ -16415,7 +16530,7 @@ function App() {
                                                         children: row.Ticker
                                                     }, void 0, false, {
                                                         fileName: "src/App.js",
-                                                        lineNumber: 209,
+                                                        lineNumber: 224,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("td", {
@@ -16425,13 +16540,13 @@ function App() {
                                                         children: row["Company Name"]
                                                     }, void 0, false, {
                                                         fileName: "src/App.js",
-                                                        lineNumber: 212,
+                                                        lineNumber: 227,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, `${row.Ticker}-${i}`, true, {
                                                 fileName: "src/App.js",
-                                                lineNumber: 203,
+                                                lineNumber: 213,
                                                 columnNumber: 19
                                             }, this)),
                                         paged.length === 0 && /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("tr", {
@@ -16444,40 +16559,33 @@ function App() {
                                                 children: "No matches."
                                             }, void 0, false, {
                                                 fileName: "src/App.js",
-                                                lineNumber: 217,
+                                                lineNumber: 232,
                                                 columnNumber: 21
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "src/App.js",
-                                            lineNumber: 216,
+                                            lineNumber: 231,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "src/App.js",
-                                    lineNumber: 201,
+                                    lineNumber: 211,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "src/App.js",
-                            lineNumber: 170,
+                            lineNumber: 192,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "src/App.js",
-                        lineNumber: 163,
+                        lineNumber: 191,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
-                        style: {
-                            display: "flex",
-                            gap: 8,
-                            alignItems: "center",
-                            justifyContent: "center",
-                            marginTop: 16,
-                            flexWrap: "wrap"
-                        },
+                        style: pagerBar,
                         children: [
                             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("button", {
                                 onClick: ()=>setPage((p)=>Math.max(1, p - 1)),
@@ -16486,7 +16594,7 @@ function App() {
                                 children: "\u2190 Prev"
                             }, void 0, false, {
                                 fileName: "src/App.js",
-                                lineNumber: 237,
+                                lineNumber: 243,
                                 columnNumber: 13
                             }, this),
                             pageNumbers(currentPage, totalPages, 7).map((n, idx)=>n === "\u2026" ? /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("span", {
@@ -16496,7 +16604,7 @@ function App() {
                                     children: "\u2026"
                                 }, `dots-${idx}`, false, {
                                     fileName: "src/App.js",
-                                    lineNumber: 248,
+                                    lineNumber: 253,
                                     columnNumber: 17
                                 }, this) : /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("button", {
                                     onClick: ()=>setPage(n),
@@ -16509,7 +16617,7 @@ function App() {
                                     children: n
                                 }, n, false, {
                                     fileName: "src/App.js",
-                                    lineNumber: 252,
+                                    lineNumber: 257,
                                     columnNumber: 17
                                 }, this)),
                             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("button", {
@@ -16519,13 +16627,13 @@ function App() {
                                 children: "Next \u2192"
                             }, void 0, false, {
                                 fileName: "src/App.js",
-                                lineNumber: 268,
+                                lineNumber: 273,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "src/App.js",
-                        lineNumber: 227,
+                        lineNumber: 242,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -16544,23 +16652,22 @@ function App() {
                         ]
                     }, void 0, true, {
                         fileName: "src/App.js",
-                        lineNumber: 277,
+                        lineNumber: 282,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "src/App.js",
-                lineNumber: 111,
+                lineNumber: 154,
                 columnNumber: 9
             }, this)
         ]
     }, void 0, true, {
         fileName: "src/App.js",
-        lineNumber: 85,
+        lineNumber: 138,
         columnNumber: 7
     }, this);
-    // Landing view
-    return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
+    /* ===================== Landing View ===================== */ return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
         style: {
             minHeight: "100vh",
             background: "linear-gradient(135deg, #1e3a8a 0%, #111827 50%, #000000 100%)",
@@ -16585,7 +16692,7 @@ function App() {
                         children: "S&P500HotJob"
                     }, void 0, false, {
                         fileName: "src/App.js",
-                        lineNumber: 306,
+                        lineNumber: 311,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -16596,47 +16703,32 @@ function App() {
                         children: [
                             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("button", {
                                 onClick: ()=>setView("companies"),
-                                style: {
-                                    background: "transparent",
-                                    color: "white",
-                                    border: "1px solid rgba(255,255,255,0.3)",
-                                    borderRadius: 10,
-                                    padding: "8px 14px",
-                                    cursor: "pointer"
-                                },
+                                style: outlineBtn,
                                 children: "Companies"
                             }, void 0, false, {
                                 fileName: "src/App.js",
-                                lineNumber: 310,
+                                lineNumber: 315,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("button", {
                                 onClick: ()=>alert("Jobs page coming soon!"),
-                                style: {
-                                    background: "#facc15",
-                                    color: "black",
-                                    border: "none",
-                                    borderRadius: 10,
-                                    padding: "8px 14px",
-                                    cursor: "pointer",
-                                    fontWeight: 700
-                                },
+                                style: primaryBtn,
                                 children: "Explore Jobs"
                             }, void 0, false, {
                                 fileName: "src/App.js",
-                                lineNumber: 323,
+                                lineNumber: 321,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "src/App.js",
-                        lineNumber: 309,
+                        lineNumber: 314,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "src/App.js",
-                lineNumber: 298,
+                lineNumber: 303,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("main", {
@@ -16659,7 +16751,7 @@ function App() {
                             children: "S&P500 Daily Jobs"
                         }, void 0, false, {
                             fileName: "src/App.js",
-                            lineNumber: 351,
+                            lineNumber: 341,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
@@ -16671,7 +16763,7 @@ function App() {
                             children: "Fresh opportunities from S&P 500 companies \u2014 updated daily."
                         }, void 0, false, {
                             fileName: "src/App.js",
-                            lineNumber: 354,
+                            lineNumber: 344,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -16683,52 +16775,37 @@ function App() {
                             children: [
                                 /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("button", {
                                     onClick: ()=>setView("companies"),
-                                    style: {
-                                        background: "transparent",
-                                        color: "white",
-                                        border: "1px solid rgba(255,255,255,0.3)",
-                                        borderRadius: 12,
-                                        padding: "12px 20px",
-                                        cursor: "pointer"
-                                    },
+                                    style: outlineBtnBig,
                                     children: "View Companies"
                                 }, void 0, false, {
                                     fileName: "src/App.js",
-                                    lineNumber: 358,
+                                    lineNumber: 348,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("button", {
                                     onClick: ()=>alert("Jobs page coming soon!"),
-                                    style: {
-                                        background: "#facc15",
-                                        color: "black",
-                                        border: "none",
-                                        borderRadius: 12,
-                                        padding: "12px 20px",
-                                        cursor: "pointer",
-                                        fontWeight: 700
-                                    },
+                                    style: primaryBtnBig,
                                     children: "Explore Jobs"
                                 }, void 0, false, {
                                     fileName: "src/App.js",
-                                    lineNumber: 371,
+                                    lineNumber: 354,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "src/App.js",
-                            lineNumber: 357,
+                            lineNumber: 347,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "src/App.js",
-                    lineNumber: 350,
+                    lineNumber: 340,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "src/App.js",
-                lineNumber: 340,
+                lineNumber: 330,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("footer", {
@@ -16745,19 +16822,81 @@ function App() {
                 ]
             }, void 0, true, {
                 fileName: "src/App.js",
-                lineNumber: 389,
+                lineNumber: 364,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "src/App.js",
-        lineNumber: 288,
+        lineNumber: 293,
         columnNumber: 5
     }, this);
 }
-_s(App, "ltMS7MrrjcHF6ccXrSRIGjskxys=");
+_s(App, "mqgS1iNA+uIBS3KvjwdeOcWYxqQ=");
 _c = App;
-/* ---------- helpers ---------- */ function btnStyle(disabled) {
+/* ---------------- styles & helpers ---------------- */ const outlineBtn = {
+    background: "transparent",
+    color: "white",
+    border: "1px solid rgba(255,255,255,0.3)",
+    borderRadius: 10,
+    padding: "8px 14px",
+    cursor: "pointer"
+};
+const primaryBtn = {
+    background: "#facc15",
+    color: "black",
+    border: "none",
+    borderRadius: 10,
+    padding: "8px 14px",
+    cursor: "pointer",
+    fontWeight: 700
+};
+const outlineBtnBig = {
+    ...outlineBtn,
+    borderRadius: 12,
+    padding: "12px 20px"
+};
+const primaryBtnBig = {
+    ...primaryBtn,
+    borderRadius: 12,
+    padding: "12px 20px"
+};
+const searchInput = {
+    flex: 1,
+    minWidth: 260,
+    padding: "10px 12px",
+    borderRadius: 10,
+    border: "1px solid rgba(255,255,255,0.2)",
+    background: "rgba(255,255,255,0.05)",
+    color: "white",
+    outline: "none"
+};
+const selectInput = {
+    padding: "8px 10px",
+    borderRadius: 8,
+    background: "rgba(255,255,255,0.05)",
+    color: "white",
+    border: "1px solid rgba(255,255,255,0.2)"
+};
+const tableWrap = {
+    overflowX: "auto",
+    border: "1px solid rgba(255,255,255,0.1)",
+    borderRadius: 12
+};
+const tableBase = {
+    width: "100%",
+    borderCollapse: "collapse",
+    minWidth: 520
+};
+const th = (active)=>({
+        textAlign: "left",
+        padding: 12,
+        borderBottom: "1px solid rgba(255,255,255,0.1)",
+        cursor: "pointer",
+        userSelect: "none",
+        color: active ? "white" : "rgba(255,255,255,0.9)"
+    });
+function btnStyle(disabled) {
     return {
         background: "transparent",
         color: disabled ? "rgba(255,255,255,0.4)" : "white",
@@ -16767,6 +16906,14 @@ _c = App;
         cursor: disabled ? "not-allowed" : "pointer"
     };
 }
+const pagerBar = {
+    display: "flex",
+    gap: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 16,
+    flexWrap: "wrap"
+};
 function pageNumbers(current, total, width = 7) {
     const pages = [];
     if (total <= width) {
@@ -19640,6 +19787,6 @@ function $da9882e673ac146b$var$ErrorOverlay() {
     return null;
 }
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}]},["1Ucli","a0t4e"], "a0t4e", "parcelRequiref2ef", {}, null, null, "http://localhost:58423")
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}]},["gb3CR","a0t4e"], "a0t4e", "parcelRequiref2ef", {}, null, null, "http://localhost:60870")
 
 //# sourceMappingURL=sp500hotjob.31b563d9.js.map

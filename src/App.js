@@ -2,7 +2,11 @@ import React, { useEffect, useMemo, useState } from "react";
 import Papa from "papaparse";
 
 export default function App() {
-  const [view, setView] = useState("landing"); // 'landing' | 'companies'
+  // Views: "landing" | "companies" | "detail"
+  const [view, setView] = useState("landing");
+  const [selectedCompany, setSelectedCompany] = useState(null);
+
+  // Data
   const [companies, setCompanies] = useState([]);
   const [loaded, setLoaded] = useState(false);
 
@@ -13,7 +17,7 @@ export default function App() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
 
-  // Load CSV only when entering the Companies view first time
+  // Load CSV only when entering the Companies view the first time
   useEffect(() => {
     if (view !== "companies" || loaded) return;
 
@@ -80,6 +84,55 @@ export default function App() {
     }
   }
 
+  /* ===================== Detail View ===================== */
+  if (view === "detail" && selectedCompany) {
+    return (
+      <div style={{ minHeight: "100vh", background: "#0b1220", color: "white" }}>
+        <header
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "16px 24px",
+            borderBottom: "1px solid rgba(255,255,255,0.1)",
+          }}
+        >
+          <div style={{ fontWeight: 800 }}>S&amp;P500HotJob</div>
+          <button
+            onClick={() => setView("companies")}
+            style={outlineBtn}
+          >
+            ← Back to Companies
+          </button>
+        </header>
+
+        <main style={{ padding: 24, maxWidth: 800, margin: "0 auto" }}>
+          <h1 style={{ marginBottom: 8 }}>
+            {selectedCompany["Company Name"]} ({selectedCompany.Ticker})
+          </h1>
+          <p style={{ opacity: 0.7, marginBottom: 24 }}>
+            Sector: {selectedCompany.Sector || "N/A"}
+          </p>
+
+          <section
+            style={{
+              padding: 20,
+              border: "1px solid rgba(255,255,255,0.2)",
+              borderRadius: 12,
+            }}
+          >
+            <h2 style={{ marginBottom: 12 }}>Jobs (Coming Soon)</h2>
+            <p style={{ opacity: 0.8, lineHeight: 1.6 }}>
+              We’ll display real job postings for <b>{selectedCompany.Ticker}</b> here
+              once the jobs engine is hooked up.
+            </p>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
+  /* ===================== Companies View ===================== */
   if (view === "companies") {
     return (
       <div style={{ minHeight: "100vh", background: "#0b1220", color: "white" }}>
@@ -93,25 +146,15 @@ export default function App() {
           }}
         >
           <div style={{ fontWeight: 800, letterSpacing: 0.5 }}>S&amp;P500HotJob</div>
-          <button
-            onClick={() => setView("landing")}
-            style={{
-              background: "transparent",
-              color: "white",
-              border: "1px solid rgba(255,255,255,0.3)",
-              borderRadius: 10,
-              padding: "8px 14px",
-              cursor: "pointer",
-            }}
-          >
+          <button onClick={() => setView("landing")} style={outlineBtn}>
             ← Back
           </button>
         </header>
 
         <main style={{ padding: 24, maxWidth: 1100, margin: "0 auto" }}>
-          <h1 style={{ marginBottom: 12 }}>S&amp;P 500 Companies</h1>
+          <h1 style={{ marginBottom: 8 }}>S&amp;P 500 Companies</h1>
           <p style={{ opacity: 0.7, marginBottom: 16 }}>
-            Data source: local CSV (we’ll wire auto-updates later).
+            Data source: <code>Data/sp500_companies.csv</code> (auto-updater ready).
           </p>
 
           {/* Controls */}
@@ -128,29 +171,14 @@ export default function App() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search by ticker or company name…"
-              style={{
-                flex: 1,
-                minWidth: 260,
-                padding: "10px 12px",
-                borderRadius: 10,
-                border: "1px solid rgba(255,255,255,0.2)",
-                background: "rgba(255,255,255,0.05)",
-                color: "white",
-                outline: "none",
-              }}
+              style={searchInput}
             />
-            <label style={{ opacity: 0.8 }}>
+            <label style={{ opacity: 0.85 }}>
               Page size:&nbsp;
               <select
                 value={pageSize}
                 onChange={(e) => setPageSize(Number(e.target.value))}
-                style={{
-                  padding: "8px 10px",
-                  borderRadius: 8,
-                  background: "rgba(255,255,255,0.05)",
-                  color: "white",
-                  border: "1px solid rgba(255,255,255,0.2)",
-                }}
+                style={selectInput}
               >
                 {[10, 20, 50, 100].map((n) => (
                   <option key={n} value={n}>{n}</option>
@@ -160,20 +188,8 @@ export default function App() {
           </div>
 
           {/* Table */}
-          <div
-            style={{
-              overflowX: "auto",
-              border: "1px solid rgba(255,255,255,0.1)",
-              borderRadius: 12,
-            }}
-          >
-            <table
-              style={{
-                width: "100%",
-                borderCollapse: "collapse",
-                minWidth: 520,
-              }}
-            >
+          <div style={tableWrap}>
+            <table style={tableBase}>
               <thead>
                 <tr style={{ background: "rgba(255,255,255,0.05)" }}>
                   {["Ticker", "Company Name"].map((key) => {
@@ -182,13 +198,7 @@ export default function App() {
                       <th
                         key={key}
                         onClick={() => clickHeader(key)}
-                        style={{
-                          textAlign: "left",
-                          padding: 12,
-                          borderBottom: "1px solid rgba(255,255,255,0.1)",
-                          cursor: "pointer",
-                          userSelect: "none",
-                        }}
+                        style={th(active)}
                         title="Click to sort"
                       >
                         {key}
@@ -202,8 +212,13 @@ export default function App() {
                 {paged.map((row, i) => (
                   <tr
                     key={`${row.Ticker}-${i}`}
+                    onClick={() => {
+                      setSelectedCompany(row);
+                      setView("detail");
+                    }}
                     style={{
                       borderBottom: "1px solid rgba(255,255,255,0.06)",
+                      cursor: "pointer",
                     }}
                   >
                     <td style={{ padding: 12, fontFamily: "monospace" }}>
@@ -224,16 +239,7 @@ export default function App() {
           </div>
 
           {/* Pagination */}
-          <div
-            style={{
-              display: "flex",
-              gap: 8,
-              alignItems: "center",
-              justifyContent: "center",
-              marginTop: 16,
-              flexWrap: "wrap",
-            }}
-          >
+          <div style={pagerBar}>
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={currentPage <= 1}
@@ -242,7 +248,6 @@ export default function App() {
               ← Prev
             </button>
 
-            {/* Page numbers (show up to 7) */}
             {pageNumbers(currentPage, totalPages, 7).map((n, idx) =>
               n === "…" ? (
                 <span key={`dots-${idx}`} style={{ opacity: 0.6 }}>
@@ -283,7 +288,7 @@ export default function App() {
     );
   }
 
-  // Landing view
+  /* ===================== Landing View ===================== */
   return (
     <div
       style={{
@@ -309,28 +314,13 @@ export default function App() {
         <div style={{ display: "flex", gap: 10 }}>
           <button
             onClick={() => setView("companies")}
-            style={{
-              background: "transparent",
-              color: "white",
-              border: "1px solid rgba(255,255,255,0.3)",
-              borderRadius: 10,
-              padding: "8px 14px",
-              cursor: "pointer",
-            }}
+            style={outlineBtn}
           >
             Companies
           </button>
           <button
             onClick={() => alert("Jobs page coming soon!")}
-            style={{
-              background: "#facc15",
-              color: "black",
-              border: "none",
-              borderRadius: 10,
-              padding: "8px 14px",
-              cursor: "pointer",
-              fontWeight: 700,
-            }}
+            style={primaryBtn}
           >
             Explore Jobs
           </button>
@@ -357,28 +347,13 @@ export default function App() {
           <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
             <button
               onClick={() => setView("companies")}
-              style={{
-                background: "transparent",
-                color: "white",
-                border: "1px solid rgba(255,255,255,0.3)",
-                borderRadius: 12,
-                padding: "12px 20px",
-                cursor: "pointer",
-              }}
+              style={outlineBtnBig}
             >
               View Companies
             </button>
             <button
               onClick={() => alert("Jobs page coming soon!")}
-              style={{
-                background: "#facc15",
-                color: "black",
-                border: "none",
-                borderRadius: 12,
-                padding: "12px 20px",
-                cursor: "pointer",
-                fontWeight: 700,
-              }}
+              style={primaryBtnBig}
             >
               Explore Jobs
             </button>
@@ -400,7 +375,68 @@ export default function App() {
   );
 }
 
-/* ---------- helpers ---------- */
+/* ---------------- styles & helpers ---------------- */
+const outlineBtn = {
+  background: "transparent",
+  color: "white",
+  border: "1px solid rgba(255,255,255,0.3)",
+  borderRadius: 10,
+  padding: "8px 14px",
+  cursor: "pointer",
+};
+const primaryBtn = {
+  background: "#facc15",
+  color: "black",
+  border: "none",
+  borderRadius: 10,
+  padding: "8px 14px",
+  cursor: "pointer",
+  fontWeight: 700,
+};
+
+const outlineBtnBig = { ...outlineBtn, borderRadius: 12, padding: "12px 20px" };
+const primaryBtnBig = { ...primaryBtn, borderRadius: 12, padding: "12px 20px" };
+
+const searchInput = {
+  flex: 1,
+  minWidth: 260,
+  padding: "10px 12px",
+  borderRadius: 10,
+  border: "1px solid rgba(255,255,255,0.2)",
+  background: "rgba(255,255,255,0.05)",
+  color: "white",
+  outline: "none",
+};
+
+const selectInput = {
+  padding: "8px 10px",
+  borderRadius: 8,
+  background: "rgba(255,255,255,0.05)",
+  color: "white",
+  border: "1px solid rgba(255,255,255,0.2)",
+};
+
+const tableWrap = {
+  overflowX: "auto",
+  border: "1px solid rgba(255,255,255,0.1)",
+  borderRadius: 12,
+};
+
+const tableBase = {
+  width: "100%",
+  borderCollapse: "collapse",
+  minWidth: 520,
+};
+
+const th = (active) => ({
+  textAlign: "left",
+  padding: 12,
+  borderBottom: "1px solid rgba(255,255,255,0.1)",
+  cursor: "pointer",
+  userSelect: "none",
+  color: active ? "white" : "rgba(255,255,255,0.9)",
+});
+
 function btnStyle(disabled) {
   return {
     background: "transparent",
@@ -411,6 +447,15 @@ function btnStyle(disabled) {
     cursor: disabled ? "not-allowed" : "pointer",
   };
 }
+
+const pagerBar = {
+  display: "flex",
+  gap: 8,
+  alignItems: "center",
+  justifyContent: "center",
+  marginTop: 16,
+  flexWrap: "wrap",
+};
 
 function pageNumbers(current, total, width = 7) {
   const pages = [];
