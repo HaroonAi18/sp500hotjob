@@ -1,0 +1,24 @@
+{
+  "name": "sp500hotjob",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "scripts": {
+    "start": "parcel index.html --open",
+    "update:sp500": "node scripts/update_sp500.cjs",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@fast-csv/format": "^5.0.5",
+    "cheerio": "^1.1.2",
+    "node-fetch": "^2.7.0",
+    "papaparse": "^5.5.3",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1"
+  },
+  "devDependencies": {
+    "parcel": "^2.15.4"
+  }
+}
