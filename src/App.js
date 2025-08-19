@@ -16,28 +16,86 @@ export default function App() {
   const [sortDir, setSortDir] = useState("asc");    // "asc" | "desc"
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
+  const [error, setError] = useState(null);
+
 
   // Load CSV only when entering the Companies view the first time
   useEffect(() => {
     if (view !== "companies" || loaded) return;
-
-    Papa.parse("/Data/sp500_companies.csv", {
-      download: true,
-      header: true,
-      skipEmptyLines: true,
-      complete: (results) => {
-        const rows = (results.data || []).filter(
-          (r) => r.Ticker && r["Company Name"]
-        );
-        setCompanies(rows);
-        setLoaded(true);
-      },
-      error: (err) => {
-        console.error("CSV load error:", err);
-        setLoaded(true);
-      },
-    });
+  
+    setError(null);
+  
+    // We try 3 locations in this order:
+    // 1) Root copy      → /sp500_companies.csv
+    // 2) Data folder    → /Data/sp500_companies.csv
+    // 3) Updater JSON   → /Data/sp500_companies.json
+    const candidates = [
+      { type: "csv",  url: "/sp500_companies.csv" },
+      { type: "csv",  url: "/Data/sp500_companies.csv" },
+      { type: "json", url: "/Data/sp500_companies.json" },
+    ];
+  
+    (async () => {
+      for (const c of candidates) {
+        try {
+          const res = await fetch(c.url, { cache: "no-store" });
+          if (!res.ok) throw new Error(`${c.url} → HTTP ${res.status}`);
+  
+          if (c.type === "csv") {
+            const text = await res.text();
+            const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
+            let rows = (parsed.data || []).map(r => {
+              // Normalize common header variants
+              const ticker = r.Ticker || r.Symbol || r.symbol;
+              const name   = r["Company Name"] || r.Company || r.company || r.name;
+              const sector = r.Sector || r.sector || "";
+              if (!ticker || !name) return null;
+              return {
+                Ticker: String(ticker).trim(),
+                "Company Name": String(name).trim(),
+                Sector: String(sector).trim(),
+              };
+            }).filter(Boolean);
+  
+            if (rows.length > 0) {
+              setCompanies(rows);
+              setLoaded(true);
+              setError(null);
+              return;
+            } else {
+              console.warn(`Parsed 0 rows from ${c.url}`);
+            }
+          } else {
+            // JSON shape from the updater: [{symbol,name,sector}]
+            const data = await res.json();
+            const rows = (data || []).map(d => ({
+              Ticker: d.symbol || d.Ticker,
+              "Company Name": d.name || d["Company Name"],
+              Sector: d.sector || d.Sector || "",
+            })).filter(r => r.Ticker && r["Company Name"]);
+  
+            if (rows.length > 0) {
+              setCompanies(rows);
+              setLoaded(true);
+              setError(null);
+              return;
+            } else {
+              console.warn(`Parsed 0 rows from ${c.url}`);
+            }
+          }
+        } catch (e) {
+          console.warn(`Failed ${c.type} ${c.url}:`, e.message);
+        }
+      }
+  
+      // If we reach here, all candidates failed
+      setLoaded(true);
+      setError(
+        "Could not load companies. Make sure sp500_companies.csv exists at project root or in Data/, or run the updater to create JSON."
+      );
+    })();
   }, [view, loaded]);
+  
 
   // Filter
   const filtered = useMemo(() => {

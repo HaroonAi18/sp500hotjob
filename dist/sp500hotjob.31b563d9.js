@@ -160,11 +160,11 @@
       });
     }
   }
-})({"gb3CR":[function(require,module,exports,__globalThis) {
+})({"5j6Kf":[function(require,module,exports,__globalThis) {
 var global = arguments[3];
 var HMR_HOST = null;
 var HMR_PORT = null;
-var HMR_SERVER_PORT = 60870;
+var HMR_SERVER_PORT = 1234;
 var HMR_SECURE = false;
 var HMR_ENV_HASH = "439701173a9199ea";
 var HMR_USE_SSE = false;
@@ -16123,23 +16123,81 @@ function App() {
     const [sortDir, setSortDir] = (0, _react.useState)("asc"); // "asc" | "desc"
     const [page, setPage] = (0, _react.useState)(1);
     const [pageSize, setPageSize] = (0, _react.useState)(10);
+    const [error, setError] = (0, _react.useState)(null);
     // Load CSV only when entering the Companies view the first time
     (0, _react.useEffect)(()=>{
         if (view !== "companies" || loaded) return;
-        (0, _papaparseDefault.default).parse("/Data/sp500_companies.csv", {
-            download: true,
-            header: true,
-            skipEmptyLines: true,
-            complete: (results)=>{
-                const rows = (results.data || []).filter((r)=>r.Ticker && r["Company Name"]);
-                setCompanies(rows);
-                setLoaded(true);
+        setError(null);
+        // We try 3 locations in this order:
+        // 1) Root copy      → /sp500_companies.csv
+        // 2) Data folder    → /Data/sp500_companies.csv
+        // 3) Updater JSON   → /Data/sp500_companies.json
+        const candidates = [
+            {
+                type: "csv",
+                url: "/sp500_companies.csv"
             },
-            error: (err)=>{
-                console.error("CSV load error:", err);
-                setLoaded(true);
+            {
+                type: "csv",
+                url: "/Data/sp500_companies.csv"
+            },
+            {
+                type: "json",
+                url: "/Data/sp500_companies.json"
             }
-        });
+        ];
+        (async ()=>{
+            for (const c of candidates)try {
+                const res = await fetch(c.url, {
+                    cache: "no-store"
+                });
+                if (!res.ok) throw new Error(`${c.url} \u{2192} HTTP ${res.status}`);
+                if (c.type === "csv") {
+                    const text = await res.text();
+                    const parsed = (0, _papaparseDefault.default).parse(text, {
+                        header: true,
+                        skipEmptyLines: true
+                    });
+                    let rows = (parsed.data || []).map((r)=>{
+                        // Normalize common header variants
+                        const ticker = r.Ticker || r.Symbol || r.symbol;
+                        const name = r["Company Name"] || r.Company || r.company || r.name;
+                        const sector = r.Sector || r.sector || "";
+                        if (!ticker || !name) return null;
+                        return {
+                            Ticker: String(ticker).trim(),
+                            "Company Name": String(name).trim(),
+                            Sector: String(sector).trim()
+                        };
+                    }).filter(Boolean);
+                    if (rows.length > 0) {
+                        setCompanies(rows);
+                        setLoaded(true);
+                        setError(null);
+                        return;
+                    } else console.warn(`Parsed 0 rows from ${c.url}`);
+                } else {
+                    // JSON shape from the updater: [{symbol,name,sector}]
+                    const data = await res.json();
+                    const rows = (data || []).map((d)=>({
+                            Ticker: d.symbol || d.Ticker,
+                            "Company Name": d.name || d["Company Name"],
+                            Sector: d.sector || d.Sector || ""
+                        })).filter((r)=>r.Ticker && r["Company Name"]);
+                    if (rows.length > 0) {
+                        setCompanies(rows);
+                        setLoaded(true);
+                        setError(null);
+                        return;
+                    } else console.warn(`Parsed 0 rows from ${c.url}`);
+                }
+            } catch (e) {
+                console.warn(`Failed ${c.type} ${c.url}:`, e.message);
+            }
+            // If we reach here, all candidates failed
+            setLoaded(true);
+            setError("Could not load companies. Make sure sp500_companies.csv exists at project root or in Data/, or run the updater to create JSON.");
+        })();
     }, [
         view,
         loaded
@@ -16222,7 +16280,7 @@ function App() {
                         children: "S&P500HotJob"
                     }, void 0, false, {
                         fileName: "src/App.js",
-                        lineNumber: 100,
+                        lineNumber: 158,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("button", {
@@ -16231,13 +16289,13 @@ function App() {
                         children: "\u2190 Back to Companies"
                     }, void 0, false, {
                         fileName: "src/App.js",
-                        lineNumber: 101,
+                        lineNumber: 159,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "src/App.js",
-                lineNumber: 91,
+                lineNumber: 149,
                 columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("main", {
@@ -16259,7 +16317,7 @@ function App() {
                         ]
                     }, void 0, true, {
                         fileName: "src/App.js",
-                        lineNumber: 110,
+                        lineNumber: 168,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
@@ -16273,7 +16331,7 @@ function App() {
                         ]
                     }, void 0, true, {
                         fileName: "src/App.js",
-                        lineNumber: 113,
+                        lineNumber: 171,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("section", {
@@ -16290,7 +16348,7 @@ function App() {
                                 children: "Jobs (Coming Soon)"
                             }, void 0, false, {
                                 fileName: "src/App.js",
-                                lineNumber: 124,
+                                lineNumber: 182,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
@@ -16304,32 +16362,32 @@ function App() {
                                         children: selectedCompany.Ticker
                                     }, void 0, false, {
                                         fileName: "src/App.js",
-                                        lineNumber: 126,
+                                        lineNumber: 184,
                                         columnNumber: 51
                                     }, this),
                                     " here once the jobs engine is hooked up."
                                 ]
                             }, void 0, true, {
                                 fileName: "src/App.js",
-                                lineNumber: 125,
+                                lineNumber: 183,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "src/App.js",
-                        lineNumber: 117,
+                        lineNumber: 175,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "src/App.js",
-                lineNumber: 109,
+                lineNumber: 167,
                 columnNumber: 9
             }, this)
         ]
     }, void 0, true, {
         fileName: "src/App.js",
-        lineNumber: 90,
+        lineNumber: 148,
         columnNumber: 7
     }, this);
     /* ===================== Companies View ===================== */ if (view === "companies") return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -16356,7 +16414,7 @@ function App() {
                         children: "S&P500HotJob"
                     }, void 0, false, {
                         fileName: "src/App.js",
-                        lineNumber: 148,
+                        lineNumber: 206,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("button", {
@@ -16365,13 +16423,13 @@ function App() {
                         children: "\u2190 Back"
                     }, void 0, false, {
                         fileName: "src/App.js",
-                        lineNumber: 149,
+                        lineNumber: 207,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "src/App.js",
-                lineNumber: 139,
+                lineNumber: 197,
                 columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("main", {
@@ -16388,7 +16446,7 @@ function App() {
                         children: "S&P 500 Companies"
                     }, void 0, false, {
                         fileName: "src/App.js",
-                        lineNumber: 155,
+                        lineNumber: 213,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
@@ -16402,14 +16460,14 @@ function App() {
                                 children: "Data/sp500_companies.csv"
                             }, void 0, false, {
                                 fileName: "src/App.js",
-                                lineNumber: 157,
+                                lineNumber: 215,
                                 columnNumber: 26
                             }, this),
                             " (auto-updater ready)."
                         ]
                     }, void 0, true, {
                         fileName: "src/App.js",
-                        lineNumber: 156,
+                        lineNumber: 214,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -16428,7 +16486,7 @@ function App() {
                                 style: searchInput
                             }, void 0, false, {
                                 fileName: "src/App.js",
-                                lineNumber: 170,
+                                lineNumber: 228,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("label", {
@@ -16451,24 +16509,24 @@ function App() {
                                                 children: n
                                             }, n, false, {
                                                 fileName: "src/App.js",
-                                                lineNumber: 184,
+                                                lineNumber: 242,
                                                 columnNumber: 19
                                             }, this))
                                     }, void 0, false, {
                                         fileName: "src/App.js",
-                                        lineNumber: 178,
+                                        lineNumber: 236,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "src/App.js",
-                                lineNumber: 176,
+                                lineNumber: 234,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "src/App.js",
-                        lineNumber: 161,
+                        lineNumber: 219,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -16496,18 +16554,18 @@ function App() {
                                                 ]
                                             }, key, true, {
                                                 fileName: "src/App.js",
-                                                lineNumber: 198,
+                                                lineNumber: 256,
                                                 columnNumber: 23
                                             }, this);
                                         })
                                     }, void 0, false, {
                                         fileName: "src/App.js",
-                                        lineNumber: 194,
+                                        lineNumber: 252,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "src/App.js",
-                                    lineNumber: 193,
+                                    lineNumber: 251,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("tbody", {
@@ -16530,7 +16588,7 @@ function App() {
                                                         children: row.Ticker
                                                     }, void 0, false, {
                                                         fileName: "src/App.js",
-                                                        lineNumber: 224,
+                                                        lineNumber: 282,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("td", {
@@ -16540,13 +16598,13 @@ function App() {
                                                         children: row["Company Name"]
                                                     }, void 0, false, {
                                                         fileName: "src/App.js",
-                                                        lineNumber: 227,
+                                                        lineNumber: 285,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, `${row.Ticker}-${i}`, true, {
                                                 fileName: "src/App.js",
-                                                lineNumber: 213,
+                                                lineNumber: 271,
                                                 columnNumber: 19
                                             }, this)),
                                         paged.length === 0 && /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("tr", {
@@ -16559,29 +16617,29 @@ function App() {
                                                 children: "No matches."
                                             }, void 0, false, {
                                                 fileName: "src/App.js",
-                                                lineNumber: 232,
+                                                lineNumber: 290,
                                                 columnNumber: 21
                                             }, this)
                                         }, void 0, false, {
                                             fileName: "src/App.js",
-                                            lineNumber: 231,
+                                            lineNumber: 289,
                                             columnNumber: 19
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "src/App.js",
-                                    lineNumber: 211,
+                                    lineNumber: 269,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "src/App.js",
-                            lineNumber: 192,
+                            lineNumber: 250,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "src/App.js",
-                        lineNumber: 191,
+                        lineNumber: 249,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -16594,7 +16652,7 @@ function App() {
                                 children: "\u2190 Prev"
                             }, void 0, false, {
                                 fileName: "src/App.js",
-                                lineNumber: 243,
+                                lineNumber: 301,
                                 columnNumber: 13
                             }, this),
                             pageNumbers(currentPage, totalPages, 7).map((n, idx)=>n === "\u2026" ? /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("span", {
@@ -16604,7 +16662,7 @@ function App() {
                                     children: "\u2026"
                                 }, `dots-${idx}`, false, {
                                     fileName: "src/App.js",
-                                    lineNumber: 253,
+                                    lineNumber: 311,
                                     columnNumber: 17
                                 }, this) : /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("button", {
                                     onClick: ()=>setPage(n),
@@ -16617,7 +16675,7 @@ function App() {
                                     children: n
                                 }, n, false, {
                                     fileName: "src/App.js",
-                                    lineNumber: 257,
+                                    lineNumber: 315,
                                     columnNumber: 17
                                 }, this)),
                             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("button", {
@@ -16627,13 +16685,13 @@ function App() {
                                 children: "Next \u2192"
                             }, void 0, false, {
                                 fileName: "src/App.js",
-                                lineNumber: 273,
+                                lineNumber: 331,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "src/App.js",
-                        lineNumber: 242,
+                        lineNumber: 300,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -16652,19 +16710,19 @@ function App() {
                         ]
                     }, void 0, true, {
                         fileName: "src/App.js",
-                        lineNumber: 282,
+                        lineNumber: 340,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "src/App.js",
-                lineNumber: 154,
+                lineNumber: 212,
                 columnNumber: 9
             }, this)
         ]
     }, void 0, true, {
         fileName: "src/App.js",
-        lineNumber: 138,
+        lineNumber: 196,
         columnNumber: 7
     }, this);
     /* ===================== Landing View ===================== */ return /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -16692,7 +16750,7 @@ function App() {
                         children: "S&P500HotJob"
                     }, void 0, false, {
                         fileName: "src/App.js",
-                        lineNumber: 311,
+                        lineNumber: 369,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -16707,7 +16765,7 @@ function App() {
                                 children: "Companies"
                             }, void 0, false, {
                                 fileName: "src/App.js",
-                                lineNumber: 315,
+                                lineNumber: 373,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("button", {
@@ -16716,19 +16774,19 @@ function App() {
                                 children: "Explore Jobs"
                             }, void 0, false, {
                                 fileName: "src/App.js",
-                                lineNumber: 321,
+                                lineNumber: 379,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "src/App.js",
-                        lineNumber: 314,
+                        lineNumber: 372,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "src/App.js",
-                lineNumber: 303,
+                lineNumber: 361,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("main", {
@@ -16751,7 +16809,7 @@ function App() {
                             children: "S&P500 Daily Jobs"
                         }, void 0, false, {
                             fileName: "src/App.js",
-                            lineNumber: 341,
+                            lineNumber: 399,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("p", {
@@ -16763,7 +16821,7 @@ function App() {
                             children: "Fresh opportunities from S&P 500 companies \u2014 updated daily."
                         }, void 0, false, {
                             fileName: "src/App.js",
-                            lineNumber: 344,
+                            lineNumber: 402,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("div", {
@@ -16779,7 +16837,7 @@ function App() {
                                     children: "View Companies"
                                 }, void 0, false, {
                                     fileName: "src/App.js",
-                                    lineNumber: 348,
+                                    lineNumber: 406,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("button", {
@@ -16788,24 +16846,24 @@ function App() {
                                     children: "Explore Jobs"
                                 }, void 0, false, {
                                     fileName: "src/App.js",
-                                    lineNumber: 354,
+                                    lineNumber: 412,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "src/App.js",
-                            lineNumber: 347,
+                            lineNumber: 405,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "src/App.js",
-                    lineNumber: 340,
+                    lineNumber: 398,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "src/App.js",
-                lineNumber: 330,
+                lineNumber: 388,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, _jsxDevRuntime.jsxDEV)("footer", {
@@ -16822,17 +16880,17 @@ function App() {
                 ]
             }, void 0, true, {
                 fileName: "src/App.js",
-                lineNumber: 364,
+                lineNumber: 422,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "src/App.js",
-        lineNumber: 293,
+        lineNumber: 351,
         columnNumber: 5
     }, this);
 }
-_s(App, "mqgS1iNA+uIBS3KvjwdeOcWYxqQ=");
+_s(App, "jnFkF80u8L1FkqkVS+CXJrNm9Ww=");
 _c = App;
 /* ---------------- styles & helpers ---------------- */ const outlineBtn = {
     background: "transparent",
@@ -19787,6 +19845,6 @@ function $da9882e673ac146b$var$ErrorOverlay() {
     return null;
 }
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}]},["gb3CR","a0t4e"], "a0t4e", "parcelRequiref2ef", {}, null, null, "http://localhost:60870")
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"jnFvT"}]},["5j6Kf","a0t4e"], "a0t4e", "parcelRequiref2ef", {}, null, null, "http://localhost:1234")
 
 //# sourceMappingURL=sp500hotjob.31b563d9.js.map
